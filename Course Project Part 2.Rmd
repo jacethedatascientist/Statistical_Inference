@@ -1,0 +1,134 @@
+---
+title: "Statistical Inference Course Project Part 2"
+author: "jacethedatascientist"
+date: "August 12, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Statistical Inference Course Project Part 2
+#### *Jace Galleon*
+
+***
+
+## I. Overview
+
+This is the second part of the Statistical Inference Course Project from Coursera.
+
+In this project, we're going to analyze the ToothGrowth data in the R datasets package.
+
+***
+
+## II. Objectives
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+4. State your conclusions and the assumptions needed for your conclusions.
+
+***
+
+## III. Data Processing
+### A. Exploration
+```{r, cache = TRUE, echo = TRUE}
+data("ToothGrowth")
+print(names(ToothGrowth))
+print(summary(ToothGrowth))
+print(paste("Number of Rows: ", nrow(ToothGrowth)))
+print(sapply(ToothGrowth, class))
+```
+
+### B. Preprocessing
+1. Since the dosage is a level not an actual value, it will be converted to factor.
+```{r, cache = TRUE, echo = TRUE}
+procData <- ToothGrowth
+procData$dose <- as.factor(procData$dose)
+```
+2. Relationship between the Tooth Length and Supplements
+```{r, cache = TRUE, echo = FALSE}
+meanSupp <- split(procData$len, procData$supp)
+sapply(meanSupp, mean)
+```
+3. Relationship between the Tooth Length and Dosage Level
+```{r, cache = TRUE, echo = FALSE}
+meanDose <- split(procData$len, procData$dose)
+sapply(meanDose, mean)
+```
+4. Variance by Dosage Level
+```{r, cache = TRUE, echo = TRUE}
+sapply(meanDose, var)
+```
+5. Variance by Supplements
+```{r, cache = TRUE, echo = TRUE}
+sapply(meanSupp, var)
+```
+
+***
+
+\newpage
+
+## IV. Analysis
+### Tooth Growth Comparison
+#### A. By Supplements
+##### Hypotheses Testing
+**Null** : *The supplements has no impact on Tooth Growth*  
+**Alternative** : *At least one of the supplements has impact on Tooth Growth*
+
+The P-value is **0.06063** and is **greater than the 0.05 significance value**, then, *we don't have any sufficient data to reject the null hypothesis*.
+
+Thus, both the supplements **has no impact** on Tooth Growth
+
+#### B. By Dosage Level
+##### Hypotheses Testing
+**Null** : *Higher dosage level has no impact on Tooth Growth*  
+**Alternative** : *Higher dosage level has impact on Tooth Growth*
+
+The P-value is **almost 0** and obviously **lesser than the 0.05 significance value**, then, *we have sufficient data to reject the null hypothesis*.
+
+Thus, higher dosage level **has impact** on Tooth Growth.
+
+***
+
+## V. Conclusion
+### Summary
+#### By using the T-Test, we can now say that:
+1. The supplements (Orange Juice and Vitamin C) **has no impact** on the Tooth Growth.
+2. Higher dosage level (0.2 or higher) **has impact** on Tooth Growth
+
+### Assumptions
+* each subject is randomly assigned
+* each subject is a representative of the population
+* observations are independent
+
+***
+
+*This formally ends the Part 2 of the Course Project. Thank You!*
+
+\newpage
+
+## VI. Additional Chart
+
+### ToothGrowth Scatter Plot
+```{r, cache = TRUE, echo = FALSE}
+plot(ToothGrowth)
+```
+
+### ToothGrowth Box Plot
+```{r, cache = TRUE, echo = FALSE}
+library(ggplot2)
+ggplot(aes(x = supp, y = len), data = procData) + geom_boxplot(aes(fill = supp)) + xlab("Application Method") + ylab("Tooth Length [mm]") + ggtitle("Tooth Length by Supplements") + scale_fill_manual(name = "Application method", values = c("darkorange1","darkgoldenrod1"), labels = c("Orange juice (OJ)", "Vitamin C (VC)"))
+ggplot(aes(x = dose, y = len), data = procData) + geom_boxplot(aes(fill = dose)) + xlab("Dosage Level") + ylab("Tooth Length [mm]") + ggtitle("Tooth Length by Dosage Level") + scale_fill_manual(name = "Dosage Level", values = c("darkturquoise","cornflowerblue","darkcyan"), labels = c("0.5mg", "1mg", "2mg"))
+```
+
+### T-Test By Supplements
+```{r, cache = TRUE, echo = FALSE}
+t.test(procData$len[procData$supp == "OJ"], procData$len[procData$supp == "VC"], paired = FALSE, var.equal = FALSE)
+```
+
+### T-Test By Dosage Level
+```{r, cache = TRUE, echo = FALSE}
+t.test(procData$len[procData$dose == 2], procData$len[procData$dose != 2], paired = FALSE, var.equal = TRUE)
+```
